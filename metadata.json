@@ -1,0 +1,7 @@
+{
+  "name": "Copy of FrameCheck Canvas Inspector",
+  "description": "A professional construction inspection app for tablets and mobile devices with round-robin deficiency tracking, photo labeling, and automated PDF reporting.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}

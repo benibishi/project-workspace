@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { ProjectState, InspectionStatus } from './types';
 import { Icons } from './constants';

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   CheckCircle2, 
@@ -12,9 +11,13 @@ import {
   Camera, 
   FileDown,
   ArrowLeft,
-  AlertTriangle
+  AlertTriangle,
+  CircleStop,
+  Mic,
+  Zap
 } from 'lucide-react';
 
+// Added Stop, Mic, and Zap icons to support the LiveAssistant's HUD and status indicators
 export const Icons = {
   Pass: CheckCircle2,
   InProgress: Clock,
@@ -27,7 +30,10 @@ export const Icons = {
   Camera: Camera,
   Download: FileDown,
   Back: ArrowLeft,
-  Alert: AlertTriangle
+  Alert: AlertTriangle,
+  Stop: CircleStop,
+  Mic: Mic,
+  Zap: Zap
 };
 
 export const COLORS = {

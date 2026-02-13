@@ -96,6 +96,38 @@ const InspectorView: React.FC<InspectorViewProps> = ({ project, onUpdate, curren
     reader.readAsDataURL(file);
   };
 
+  // Helper to parse notes into checklist items
+  const parseNotes = (notes: string) => {
+    if (!notes) return [];
+    return notes.split('\n').filter(line => line.trim() !== '').map(line => {
+      const isChecked = line.startsWith('[x] ');
+      const isUnchecked = line.startsWith('[ ] ');
+      return {
+        text: (isChecked || isUnchecked) ? line.substring(4) : line,
+        completed: isChecked
+      };
+    });
+  };
+
+  // Helper to stringify checklist items back to notes
+  const stringifyNotes = (items: { text: string, completed: boolean }[]) => {
+    return items.map(i => `${i.completed ? '[x]' : '[ ]'} ${i.text}`).join('\n');
+  };
+
+  const toggleChecklistItem = (catId: string, itemId: string, notes: string, index: number) => {
+    const items = parseNotes(notes);
+    if (items[index]) {
+      items[index].completed = !items[index].completed;
+      updateItemDetails(catId, itemId, { notes: stringifyNotes(items) });
+    }
+  };
+
+  const addChecklistItem = (catId: string, itemId: string, notes: string, text: string) => {
+    const items = parseNotes(notes);
+    items.push({ text, completed: false });
+    updateItemDetails(catId, itemId, { notes: stringifyNotes(items) });
+  };
+
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
       {activeLevelCategories.length === 0 ? (
@@ -119,7 +151,6 @@ const InspectorView: React.FC<InspectorViewProps> = ({ project, onUpdate, curren
                 onClick={() => setSelectedCategory(cat)}
                 className="btn-modern group relative flex flex-col items-center justify-center gap-5 p-8 glass-card rounded-4xl transition-all duration-300 hover:border-brand-300 hover:shadow-brand-100/20 hover:shadow-2xl active:scale-95"
               >
-                {/* Background Glow on Hover */}
                 <div className="absolute inset-0 bg-gradient-to-br from-brand-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-4xl" />
                 
                 <div className={`relative w-20 h-20 rounded-3xl flex items-center justify-center transition-all duration-300 shadow-sm ${failCount > 0 ? 'bg-red-50 text-red-500' : 'bg-slate-50 text-slate-400 group-hover:bg-brand-500 group-hover:text-white group-hover:rotate-6 group-hover:scale-110'}`}>
@@ -170,6 +201,8 @@ const InspectorView: React.FC<InspectorViewProps> = ({ project, onUpdate, curren
                 const round = result?.round || 0;
                 const isEscalated = round >= 3;
 
+                const checklistItems = parseNotes(result?.notes || '');
+
                 return (
                   <div 
                     key={idx} 
@@ -211,12 +244,12 @@ const InspectorView: React.FC<InspectorViewProps> = ({ project, onUpdate, curren
                     {status === InspectionStatus.FAIL && result && (
                       <div className="space-y-8 pt-8 border-t border-slate-100 animate-in fade-in slide-in-from-top-4 duration-300">
                         <div className="space-y-4">
-                          <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-2">Quick Tags</label>
+                          <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-2">Quick Tags (Add Line Item)</label>
                           <div className="flex flex-wrap gap-2.5">
                             {project.quickNotes.map(note => (
                               <button 
                                 key={note}
-                                onClick={() => updateItemDetails(selectedCategory.id, result.id, { notes: result.notes ? `${result.notes}\n${note}` : note })}
+                                onClick={() => addChecklistItem(selectedCategory.id, result.id, result.notes, note)}
                                 className="px-5 py-3 bg-white border border-slate-200 shadow-sm rounded-2xl text-[12px] font-bold text-slate-600 hover:bg-brand-500 hover:border-brand-500 hover:text-white transition-all duration-300 active:scale-95"
                               >
                                 {note}
@@ -226,14 +259,39 @@ const InspectorView: React.FC<InspectorViewProps> = ({ project, onUpdate, curren
                         </div>
                         
                         <div className="space-y-4">
-                          <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-2">Deficiency Description</label>
-                          <textarea 
-                            rows={3}
-                            value={result.notes}
-                            onChange={(e) => updateItemDetails(selectedCategory.id, result.id, { notes: e.target.value })}
-                            placeholder="Detail the failure requirements..."
-                            className="w-full p-6 bg-slate-50/50 border border-slate-200 rounded-4xl text-base outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all resize-none font-bold leading-relaxed shadow-inner"
-                          />
+                          <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-2">Deficiency Checklist</label>
+                          <div className="space-y-3">
+                            {checklistItems.map((item, cIdx) => (
+                              <div 
+                                key={cIdx} 
+                                onClick={() => toggleChecklistItem(selectedCategory.id, result.id, result.notes, cIdx)}
+                                className={`flex items-center gap-4 p-4 rounded-2xl border-2 transition-all cursor-pointer ${item.completed ? 'bg-slate-50 border-slate-100 opacity-60' : 'bg-white border-slate-100 hover:border-brand-200'}`}
+                              >
+                                <div className={`w-8 h-8 rounded-lg border-2 flex items-center justify-center transition-all ${item.completed ? 'bg-brand-600 border-brand-600' : 'border-slate-200 bg-white'}`}>
+                                  {item.completed && <Icons.Pass className="w-5 h-5 text-white" />}
+                                </div>
+                                <span className={`font-bold text-base transition-all ${item.completed ? 'line-through text-slate-400' : 'text-slate-700'}`}>
+                                  {item.text}
+                                </span>
+                              </div>
+                            ))}
+                            <div className="flex gap-2">
+                               <input 
+                                 type="text"
+                                 placeholder="Add specific failure detail..."
+                                 className="flex-1 p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:border-brand-500 transition-all"
+                                 onKeyDown={(e) => {
+                                   if (e.key === 'Enter') {
+                                     const val = e.currentTarget.value.trim();
+                                     if (val) {
+                                       addChecklistItem(selectedCategory.id, result.id, result.notes, val);
+                                       e.currentTarget.value = '';
+                                     }
+                                   }
+                                 }}
+                               />
+                            </div>
+                          </div>
                         </div>
 
                         <div className="space-y-4">

@@ -81,19 +81,22 @@ const App: React.FC = () => {
                 <div className="w-10 h-10 bg-brand-600 rounded-2xl flex items-center justify-center shadow-xl shadow-brand-500/20">
                   <Icons.Inspector className="w-6 h-6 text-white" />
                 </div>
-                <span className="text-[13px] font-black uppercase tracking-[0.3em] text-brand-600">Canvas v1.4</span>
+                <span className="text-[13px] font-black uppercase tracking-[0.3em] text-brand-600">Canvas v1.5</span>
               </div>
               <h1 className="text-6xl font-black text-slate-900 tracking-tighter leading-none">Project Workspace</h1>
               <p className="text-slate-500 font-medium text-xl max-w-xl leading-relaxed">Precision inspection tracking for professional site walks.</p>
             </div>
-            <button 
-              onClick={() => setShowNewProjectModal(true)}
-              className="btn-modern group relative bg-slate-900 text-white px-10 py-5 rounded-3xl font-black uppercase tracking-[0.15em] text-xs shadow-3xl hover:shadow-brand-300 transition-all active:scale-95 overflow-hidden flex items-center gap-4"
-            >
-              <div className="absolute inset-0 bg-gradient-to-tr from-brand-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <Icons.Add className="w-5 h-5 relative z-10" />
-              <span className="relative z-10">Start New Inspection</span>
-            </button>
+            
+            <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+              <button 
+                onClick={() => setShowNewProjectModal(true)}
+                className="btn-modern group relative bg-slate-900 text-white px-10 py-5 rounded-3xl font-black uppercase tracking-[0.15em] text-xs shadow-3xl hover:shadow-brand-300 transition-all active:scale-95 overflow-hidden flex items-center gap-4"
+              >
+                <div className="absolute inset-0 bg-gradient-to-tr from-brand-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <Icons.Add className="w-5 h-5 relative z-10" />
+                <span className="relative z-10">Start New Inspection</span>
+              </button>
+            </div>
           </header>
 
           {projects.length === 0 ? (
@@ -164,6 +167,7 @@ const App: React.FC = () => {
           )}
         </div>
 
+        {/* New Project Modal */}
         {showNewProjectModal && (
           <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xl z-50 flex items-center justify-center p-8">
             <div className="bg-white rounded-5xl w-full max-w-xl shadow-2xl p-12 animate-in zoom-in duration-500 border border-white">
@@ -261,7 +265,7 @@ const App: React.FC = () => {
             <select 
               value={currentLevel}
               onChange={(e) => setCurrentLevel(e.target.value)}
-              className="bg-transparent border-none rounded-2xl pr-12 pl-3 py-3 text-lg font-black text-slate-900 outline-none focus:ring-0 cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M7%2010L12%2015L17%2010%22%20stroke%3D%22%2364748B%22%20stroke-width%3D%223%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E')] bg-[length:24px_24px] bg-[right_12px_center] bg-no-repeat tracking-tight"
+              className="bg-transparent border-none rounded-2xl pr-12 pl-3 py-3 text-lg font-black text-slate-900 outline-none focus:ring-0 cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2224%22%20height%22%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M7%2010L12%2015L17%2010%22%20stroke%3D%22%2364748B%22%20stroke-width%3D%223%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E')] bg-[length:24px_24px] bg-[right_12px_center] bg-no-repeat tracking-tight"
             >
               {activeProject.levels.map(lvl => (
                 <option key={lvl} value={lvl}>{lvl}</option>

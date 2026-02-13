@@ -10,6 +10,7 @@ const STYLES = {
     text: [30, 41, 59] as [number, number, number],
     muted: [100, 116, 139] as [number, number, number],
     border: [226, 232, 240] as [number, number, number],
+    success: [34, 197, 94] as [number, number, number],
   },
   spacing: {
     margin: 20,
@@ -156,16 +157,40 @@ const renderItemDetail = (doc: jsPDF, item: ItemResult, state: { yPos: number, p
 
   state.yPos += 6;
 
-  // Notes
+  // Notes parsing for checklist
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(10);
-  doc.setTextColor(...STYLES.colors.muted);
   
-  const notes = item.notes || 'No specific deficiency notes provided.';
-  const splitNotes = doc.splitTextToSize(notes, 160);
-  doc.text(splitNotes, STYLES.spacing.margin + 10, state.yPos);
-  
-  state.yPos += (splitNotes.length * 5) + 5;
+  const rawNotes = item.notes || 'No specific deficiency notes provided.';
+  const lines = rawNotes.split('\n');
+
+  lines.forEach(line => {
+    if (!line.trim()) return;
+    
+    checkPageSpace(doc, state, 6);
+    
+    const isChecked = line.startsWith('[x] ');
+    const isUnchecked = line.startsWith('[ ] ');
+    const textToRender = (isChecked || isUnchecked) ? line.substring(4) : line;
+
+    if (isChecked) {
+      doc.setTextColor(...STYLES.colors.muted);
+      const textWidth = doc.getTextWidth(textToRender);
+      doc.text(textToRender, STYLES.spacing.margin + 10, state.yPos);
+      
+      // Draw strikethrough line
+      doc.setDrawColor(...STYLES.colors.muted);
+      doc.setLineWidth(0.2);
+      doc.line(STYLES.spacing.margin + 10, state.yPos - 1, STYLES.spacing.margin + 10 + textWidth, state.yPos - 1);
+    } else {
+      doc.setTextColor(...STYLES.colors.muted);
+      doc.text(textToRender, STYLES.spacing.margin + 10, state.yPos);
+    }
+    
+    state.yPos += 6;
+  });
+
+  state.yPos += 5;
 
   // Photos (Two per row)
   if (item.photos.length > 0) {
@@ -227,7 +252,7 @@ const renderFinalSummary = (doc: jsPDF, project: ProjectState, state: { yPos: nu
   doc.text('Summary of Deficiencies', STYLES.spacing.margin, state.yPos);
   
   doc.setFontSize(20);
-  const color = totalFails > 0 ? STYLES.colors.danger : [34, 197, 94] as [number, number, number];
+  const color = totalFails > 0 ? STYLES.colors.danger : STYLES.colors.success;
   doc.setTextColor(...color);
   doc.text(`${totalFails}`, 190, state.yPos + 1, { align: 'right' });
   
